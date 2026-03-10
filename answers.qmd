@@ -14,6 +14,9 @@ format:
   typst:
     toc: true
     toc-title: Contents
+    output-file: PREFIX_03-problem-set.pdf
+    pdf-standard: ua-1
+    callout-appearance: minimal
     include-in-header: 
       text: |
         // TOC stuff
@@ -24,8 +27,9 @@ format:
         }
     include-before-body: 
       text: |
-        // Color links with pink-ish red from viridis plasma: viridis::plasma(n = 7)[1]
-        #show link: set text(fill: rgb("cc4678"))
+        // Color links with pink-ish red from viridis plasma:
+        // viridisLite::viridis(8, option = "inferno", begin = 0.1, end = 0.9)[4]
+        #show link: set text(fill: rgb("a52c60"))
 
         // Keep track of previous heading levels
         #let last-heading-level = state("last-heading-level", 0)
@@ -100,7 +104,24 @@ Your task in this problem set is to analyze these two datasets to find the causa
 
 @fig-program-dag shows the full DAG for the rain barrel program. There are four confounders that complicate the relationship between barrel use and water bills.
 
-![Rain barrel program DAG](images/barrel-dag-observational.png){#fig-program-dag width="75%" fig-align="center"}
+```{r}
+#| label: fig-program-dag
+#| fig-cap: Rain barrel program DAG
+#| fig-alt:
+#|   Directed acyclic graph (DAG) showing the observational causal structure
+#|   of the rain barrel program. Rain barrel (blue, exposure) and water bill
+#|   (orange, outcome) are positioned left and right in the center. Four
+#|   confounders—yard size, home garden, environmental attitudes, and average
+#|   temperature—are positioned vertically between them. Arrows from all four
+#|   confounders point to both rain barrel and water bill, opening backdoor
+#|   paths that prevent a simple comparison from recovering the causal effect.
+#|   Home garden is also caused by yard size and environmental attitudes.
+#| out-width: 75%
+#| fig-align: center
+#| echo: false
+
+knitr::include_graphics("images/barrel-dag-observational.png")
+```
 
 ***Follow these two examples from class as guides:***
 
@@ -137,7 +158,22 @@ barrels_obs <- read_csv("data/barrels_observational.csv") |>
 
 You remember from PMAP 8521 that when running an RCT, you can draw the DAG for the program like @fig-rct-dag.
 
-![Rain barrel program DAG as an RCT](images/barrel-dag-rct.png){#fig-rct-dag width="75%" fig-align="center"}
+```{r}
+#| label: fig-rct-dag
+#| fig-cap: Rain barrel program DAG as an RCT
+#| fig-alt: |
+#|   Directed acyclic graph (DAG) showing the causal structure under a
+#|   randomized controlled trial. The layout is identical to the observational
+#|   DAG, but the arrows from yard size, home garden, environmental attitudes,
+#|   and average temperature into rain barrel are absent. Randomization severs
+#|   these links, closing all backdoor paths and allowing the rain barrel →
+#|   water bill arrow to be interpreted as a causal effect.
+#| out-width: 75%
+#| fig-align: center
+#| echo: false
+
+knitr::include_graphics("images/barrel-dag-rct.png")
+```
 
 **Explain how @fig-rct-dag is different from @fig-program-dag and why it lets us identify the causal effect of the program.**
 
@@ -195,6 +231,14 @@ So in @fig-visualize-treatment-difference we run `prop.test()` twice and extract
 ```{r}
 #| label: fig-visualize-treatment-difference
 #| fig-cap: Difference in proportions of households assigned to treatment and outcome groups
+#| fig-alt: |
+#|   Point-range chart showing the proportion of households assigned to each
+#|   group along the y-axis (displayed as percentages) and group (No barrel,
+#|   Barrel) along the x-axis. An orange horizontal reference line marks 50%.
+#|   The control group (No barrel) is assigned at roughly 45% and the
+#|   treatment group (Barrel) at roughly 55%, with confidence intervals that
+#|   do not overlap 50%, indicating a statistically significant imbalance in
+#|   treatment assignment.
 
 all_proportions <- barrels_rct |>
   count(barrel) |>
@@ -290,6 +334,14 @@ t.test(temperature ~ barrel, data = barrels_rct) |>
 ```{r}
 #| label: fig-pretreatment-balance
 #| fig-cap: Average values of pre-treatment confounders across treatment and control groups
+#| fig-alt: |
+#|   Four point-range plots arranged in a 2×2 grid. Each plot compares the
+#|   mean value of a pre-treatment covariate (proportion with a home garden,
+#|   yard size in square feet, attitude toward environment, temperature) for
+#|   the No barrel and Barrel groups. In all four panels, the confidence
+#|   intervals overlap substantially, indicating no statistically significant
+#|   differences in pre-treatment characteristics across treatment and control
+#|   groups.
 #| fig-width: 8
 #| fig-height: 6
 #| out-width: 100%
